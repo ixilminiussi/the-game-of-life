@@ -15,7 +15,7 @@ size_y = int(sys.argv[3])
 generation_count = int(sys.argv[4])
 output_cycle = int(sys.argv[5])
 include_start = 0
-if (len(sys.argv) > 5): include_start = int(sys.argv[6])
+if (len(sys.argv) > 6): include_start = int(sys.argv[6])
 
 glider = np.array([[0,0,0,0,0],
 [0,0,1,0,0],
