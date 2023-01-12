@@ -4,3 +4,4 @@ interpreter/video/
 *.mp4
 __pycache__/
 .vscode/
+*.xml
