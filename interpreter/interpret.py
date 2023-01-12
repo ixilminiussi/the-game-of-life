@@ -7,6 +7,10 @@ import os
 g = []
 G = {}
 
+if (len(sys.argv) < 4):
+    raise AttributeError(
+        'input output(dir for v or f) generation|v(for video)|f(for all frames) framerate(default 10)')
+
 inputLocation = sys.argv[1]
 outputLocation = sys.argv[2]
 generation = sys.argv[3]
@@ -43,11 +47,23 @@ def generate_grid(generation):
     
     return grid.astype('uint8')*255
     
-if (generation == '-v'):
+locations = []
+
+if ('v' in generation or 'f' in generation):
+    os.system("mkdir -p {0}".format(outputLocation))
     for i in g:
         imageObject = Image.fromarray(generate_grid(int(i)))
+        locations.append(outputLocation + '/' + str(i) + '.png')
         imageObject.save(outputLocation + '/' + str(i) + '.png')
-    os.system("ffmpeg  -hide_banner -loglevel error -framerate {0} -i '{1}' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p video.mp4".format(framerate, outputLocation + '/%00d.png'))
+    
+    if ('v' in generation):
+        os.system("ffmpeg  -hide_banner -loglevel error -framerate {0} -i '{1}' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p video.mp4".format(framerate, outputLocation + '/%00d.png'))
+    
+    if ('f' not in generation):
+        for image in locations:
+            os.system("rm {0}".format(image))
+        os.system('rmdir {0}'.format(outputLocation))
+
 else:
     imageObject = Image.fromarray(generate_grid(int(generation)))
     imageObject.save(outputLocation)
