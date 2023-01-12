@@ -1,2 +1,6 @@
-/gitignore
-/interpreter/video
+gitignore/
+interpreter/video/
+*.png
+*.mp4
+__pycache__/
+.vscode/
