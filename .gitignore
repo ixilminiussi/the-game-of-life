@@ -1,6 +1,6 @@
-interpreter/video/
-*.png
-*.mp4
+interpreter/*
+generator/*
+!*.py
 __pycache__/
-.vscode/
+.*/
 *.xml
