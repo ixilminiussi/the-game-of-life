@@ -14,7 +14,7 @@ def file_to_cdata(file):
         for i in reversed(lines):
             if '//@@//' in i:
                 state = state + 1
-            if state == 1:
+            elif state == 1:
                 code = i + code
             if state == 2:
                 break
@@ -85,19 +85,16 @@ template = Template('''
             {{ graphType.Properties }}
             ]]>
         </Properties>
-        <MessageTypes>
-            {% for messageType in graphType.MessageTypes %}
+        <MessageTypes>{% for messageType in graphType.MessageTypes %}
             <MessageType id="{{ messageType.id }}">
                 <Message>
                     <![CDATA[ 
                         {{ messageType.CDATA }}
                     ]]>
                 </Message>
-            </MessageType>
-            {% endfor %}
+            </MessageType>{% endfor %}
         </MessageTypes>
-        <DeviceTypes>
-            {% for device in graphType.DeviceTypes %}
+        <DeviceTypes>{% for device in graphType.DeviceTypes %}
             <DeviceType id="{{ device.id }}">
                 <Properties>
                     <![CDATA[
@@ -123,34 +120,29 @@ template = Template('''
                     <![CDATA[
                         {{ device.ReadyToSend }}
                     ]]>
-                </ReadyToSend>
-                {% for outputPin in device.OutputPins %}
+                </ReadyToSend>{% for outputPin in device.OutputPins %}
                 <OutputPin name="{{ outputPin.name }}" messageTypeId="{{ outputPin.messageTypeId }}">
                     <OnSend>
                         <![CDATA[
                             {{ outputPin.OnSend }}
                         ]]>
                     </OnSend>
-                </OutputPin>
-                {% endfor %}
+                </OutputPin>{% endfor %}
                 <SupervisorOutPin messageTypeId="{{ device.SupervisorOutPin.messageTypeId }}">
                     <OnSend>
                         <![CDATA[ 
                             {{ device.SupervisorOutPin.OnSend }}
                         ]]>
                     </OnSend>
-                </SupervisorOutPin>
-                {% for inputPin in device.InputPins %}
+                </SupervisorOutPin>{% for inputPin in device.InputPins %}
                 <InputPin name="{{ inputPin.name }}" messageTypeId="{{ inputPin.messageTypeId }}">
                     <OnReceive>
                         <![CDATA[
                             {{ inputPin.OnReceive }}
                         ]]>
                     </OnReceive>
-                </InputPin>
-                {% endfor %}
-            </DeviceType>
-            {% endfor %}
+                </InputPin>{% endfor %}
+            </DeviceType>{% endfor %}
             <SupervisorType id="{{ graphType.SupervisorType.id }}">
                 <Code>
                     <![CDATA[ 
@@ -171,16 +163,14 @@ template = Template('''
                     <![CDATA[
                         {{ graphType.SupervisorType.OnStop }}
                     ]]>
-                </OnStop>
-                {% for supervisorInPin in graphType.SupervisorType.SupervisorInPins %}
+                </OnStop>{% for supervisorInPin in graphType.SupervisorType.SupervisorInPins %}
                 <SupervisorInPin id="{{ supervisorInPin.id }}" messageTypeId="{{ supervisorInPin.messageTypeId }}">
                     <OnReceive>
                         <![CDATA[
                             {{ supervisorInPin.OnReceive }}
                         ]]>
                     </OnReceive>
-                </SupervisorInPin>
-                {% endfor %}
+                </SupervisorInPin>{% endfor %}
             </SupervisorType>
         </DeviceTypes>
     </GraphType>
