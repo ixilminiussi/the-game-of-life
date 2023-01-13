@@ -1,7 +1,6 @@
 gitignore/
-interpreter/video/
-*.png
-*.mp4
+interpreter/*
+!interpreter/interpret.py
 __pycache__/
 .*/
 *.xml
