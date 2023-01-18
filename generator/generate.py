@@ -56,12 +56,12 @@ outputFile = 'gol.xml'
 appname = 'gol'
 cellCount = len(data) * len(data[0])
 
-messageNeighbours = type.MessageType(id='messageNeighbours', cdata='code/messageNeighbours.c')
-messageSupervisor = type.MessageType(id='messageSupervisor', cdata='code/messageSupervisor.c')
-cell = type.DeviceType(id='cell', properties='code/cell/properties.c', state='code/cell/state.c', onInit='code/cell/onInit.c', onDeviceIdle='code/cell/onDeviceIdle.c', readyToSend='code/cell/readyToSend.c', outputPins=[type.OutputPin('sender', 'messageNeighbours', 'code/cell/onSendNeighbours.c')], supervisorOutPin=type.SupervisorOutPin('messageSupervisor', 'code/cell/onSendSupervisor.c'), inputPins=[type.InputPin('receiver', 'messageNeighbours', 'code/cell/onReceive.c')])
-pinger = type.DeviceType(id='pinger', properties='code/pinger/properties.c', state='code/pinger/state.c', onInit='code/pinger/onInit.c', onDeviceIdle='code/pinger/onDeviceIdle.c', readyToSend='code/pinger/readyToSend.c', outputPins=[], supervisorOutPin=type.SupervisorOutPin(messageTypeId='messageSupervisor', onSend='code/pinger/onSendSupervisor.c'), inputPins=[])
-supervisor = type.SupervisorType(id='id', code='code/supervisor/code.c', state='code/supervisor/state.c', onInit='code/supervisor/onInit.c', onStop='code/supervisor/onStop.c', supervisorInPins=[type.SupervisorInPin('', 'messageSupervisor', 'code/supervisor/onReceive.c')])
-graphType = type.GraphType(id='gol_type', messageTypes=[messageNeighbours, messageSupervisor], properties='code/properties.c', deviceTypes=[cell, pinger], supervisorType=supervisor)
+messageNeighbours = type.MessageType(id='messageNeighbours', cdata='application/messageNeighbours.c')
+messageSupervisor = type.MessageType(id='messageSupervisor', cdata='application/messageSupervisor.c')
+cell = type.DeviceType(id='cell', properties='application/cell/properties.c', state='application/cell/state.c', onInit='application/cell/onInit.c', onDeviceIdle='application/cell/onDeviceIdle.c', readyToSend='application/cell/readyToSend.c', outputPins=[type.OutputPin('sender', 'messageNeighbours', 'application/cell/onSendNeighbours.c')], supervisorOutPin=type.SupervisorOutPin('messageSupervisor', 'application/cell/onSendSupervisor.c'), inputPins=[type.InputPin('receiver', 'messageNeighbours', 'application/cell/onReceive.c')])
+pinger = type.DeviceType(id='pinger', properties='application/pinger/properties.c', state='application/pinger/state.c', onInit='application/pinger/onInit.c', onDeviceIdle='application/pinger/onDeviceIdle.c', readyToSend='application/pinger/readyToSend.c', outputPins=[], supervisorOutPin=type.SupervisorOutPin(messageTypeId='messageSupervisor', onSend='application/pinger/onSendSupervisor.c'), inputPins=[])
+supervisor = type.SupervisorType(id='id', code='application/supervisor/code.c', state='application/supervisor/state.c', onInit='application/supervisor/onInit.c', onStop='application/supervisor/onStop.c', supervisorInPins=[type.SupervisorInPin('', 'messageSupervisor', 'application/supervisor/onReceive.c')])
+graphType = type.GraphType(id='gol_type', messageTypes=[messageNeighbours, messageSupervisor], properties='application/properties.c', deviceTypes=[cell, pinger], supervisorType=supervisor)
 
 graphInstance = instance.GraphInstance(id='gol_instance', graphTypeId='gol_type', P='{%d,%d,%d,%d}' % (cellCount, generation_count, output_cycle, include_start))
 
