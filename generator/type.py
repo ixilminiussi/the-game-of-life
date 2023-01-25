@@ -50,9 +50,10 @@ class MessageType:
         self.CDATA = file_to_cdata(cdata) #file path
 
 class DeviceType:
-    def __init__(self, id, properties, state, onInit, onDeviceIdle, readyToSend, outputPins, supervisorOutPin, inputPins):
+    def __init__(self, id, sharedCode, properties, state, onInit, onDeviceIdle, readyToSend, outputPins, supervisorOutPin, inputPins):
         self.id = id
         self.Properties = file_to_cdata(properties) #file path
+        self.SharedCode = file_to_cdata(sharedCode) #file path
         self.State = file_to_cdata(state) #file path
         self.OnInit = file_to_cdata(onInit) #file path
         self.OnDeviceIdle = file_to_cdata(onDeviceIdle) #file path
@@ -71,8 +72,9 @@ class SupervisorType:
         self.SupervisorInPins = supervisorInPins #Array of SupervisorInPin
 
 class GraphType:
-  def __init__(self, id, messageTypes, properties, deviceTypes, supervisorType):
+  def __init__(self, id, sharedCode, messageTypes, properties, deviceTypes, supervisorType):
     self.id = id
+    self.SharedCode = file_to_cdata(sharedCode) #file path
     self.MessageTypes = messageTypes #Array of MessageType
     self.Properties = file_to_cdata(properties) #file path
     self.DeviceTypes = deviceTypes #Array of MessageType
@@ -85,6 +87,11 @@ template = Template('''
             {{ graphType.Properties }}
             ]]>
         </Properties>
+        <SharedCode>
+            <![CDATA[
+            {{ graphType.SharedCode}}
+            ]]>
+        </SharedCode>
         <MessageTypes>{% for messageType in graphType.MessageTypes %}
             <MessageType id="{{ messageType.id }}">
                 <Message>
@@ -101,6 +108,11 @@ template = Template('''
                         {{ device.Properties }}
                     ]]>
                 </Properties>
+                <SharedCode>
+                    <![CDATA[
+                    {{ device.SharedCode}}
+                    ]]>
+                </SharedCode>
                 <State>
                     <![CDATA[ 
                         {{ device.State }}

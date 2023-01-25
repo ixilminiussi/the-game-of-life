@@ -10,6 +10,7 @@ void main()
     MSG(x) = DEVICEPROPERTIES(x);
     MSG(y) = DEVICEPROPERTIES(y);
     MSG(ping) = 0;
+    MSG(speed) = DEVICESTATE(btimer);
     DEVICESTATE(buffer) = 0;
 
     if (DEVICESTATE(generation) == GRAPHPROPERTIES(end))

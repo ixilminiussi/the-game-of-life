@@ -30,10 +30,12 @@ void main()
 
     if (DEVICESTATE(generation) == DEVICESTATE(cycle) || DEVICESTATE(generation) == GRAPHPROPERTIES(end))
     {
+        DEVICESTATE(btimer) = tinselCycleCount() - DEVICESTATE(start);
         DEVICESTATE(balive) = DEVICESTATE(alive);
         DEVICESTATE(bgeneration) = DEVICESTATE(generation);
         DEVICESTATE(cycle) += GRAPHPROPERTIES(cycles);
         DEVICESTATE(buffer) = DEVICESTATE(alive) || DEVICESTATE(generation) == GRAPHPROPERTIES(end); // send if we're alive or if we're on the last generation
+        //DEVICESTATE(buffer) = 1;
     }
 
     MSG(alive) = DEVICESTATE(alive);
