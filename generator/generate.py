@@ -1,5 +1,6 @@
 import type
 import instance
+import definitions
 import sys
 import os
 import numpy as np
@@ -35,7 +36,7 @@ def create_binary_graph(filename, grid_size_x, grid_size_y):
 
     # Set the coordinates to 1
     for coord in coords:
-        grid[int(coord[0]) - 1][int(coord[1]) - 1] = 1
+        grid[int(coord[0])][int(coord[1])] = 1
 
     return grid
 
@@ -52,25 +53,12 @@ match sys.argv[1]:
         else:
             data = create_binary_graph(sys.argv[1], size_x, size_y)
 
-outputFile = 'gol.xml'
-appname = 'gol'
 cellCount = len(data) * len(data[0])
 
-messageNeighbours = type.MessageType(id='messageNeighbours', cdata='code/messageNeighbours.c')
-messageSupervisor = type.MessageType(id='messageSupervisor', cdata='code/messageSupervisor.c')
-messageAggregator = type.MessageType(id='messageAggregator', cdata='code/messageAggregator.c')
-cell = type.DeviceType(id='cell', properties='code/cell/properties.c', state='code/cell/state.c', onInit='code/cell/onInit.c', onDeviceIdle='code/cell/onDeviceIdle.c', readyToSend='code/cell/readyToSend.c', outputPins=[type.OutputPin('neighbourSend', 'messageNeighbours', 'code/cell/onSendNeighbours.c'), type.OutputPin('aggregatorSend', 'messageAggregator', 'code/cell/onSendAggregator.c')], supervisorOutPin=[], inputPins=[type.InputPin('neighbourReceive', 'messageNeighbours', 'code/cell/onReceive.c')])
-aggregator = type.DeviceType(id='aggregator', properties='code/aggregator/properties.c', state='code/aggregator/state.c', onInit='code/aggregator/onInit.c', onDeviceIdle='code/aggregator/onDeviceIdle.c', readyToSend='code/aggregator/readyToSend.c', outputPins=[type.OutputPin('aggregatorSend', 'messageAggregator', 'code/aggregator/onSendAggregator.c')], supervisorOutPin=[type.SupervisorOutPin('supervisorSend', 'messageSupervisor', 'code/cell/onSendSupervisor.c')], inputPins=[type.InputPin('aggregatorReceive', 'messageAggregator', 'code/aggregator/onReceive.c')]
-pinger = type.DeviceType(id='pinger', properties='code/pinger/properties.c', state='code/pinger/state.c', onInit='code/pinger/onInit.c', onDeviceIdle='code/pinger/onDeviceIdle.c', readyToSend='code/pinger/readyToSend.c', outputPins=[], supervisorOutPin=type.SupervisorOutPin(messageTypeId='messageSupervisor', onSend='code/pinger/onSendSupervisor.c'), inputPins=[])
-supervisor = type.SupervisorType(id='id', code='code/supervisor/code.c', state='code/supervisor/state.c', onInit='code/supervisor/onInit.c', onStop='code/supervisor/onStop.c', supervisorInPins=[type.SupervisorInPin('', 'messageSupervisor', 'code/supervisor/onReceive.c')])
-graphType = type.GraphType(id='gol_type', messageTypes=[messageNeighbours, messageSupervisor], properties='code/properties.c', deviceTypes=[cell, pinger], supervisorType=supervisor)
+renderedGraphType = type.render(graphType=definitions.graphType)
+renderedGraphInstance = instance.render(graphInstance=definitions.graphInstance([cellCount, generation_count, output_cycle, include_start]), data=data)
 
-graphInstance = instance.GraphInstance(id='gol_instance', graphTypeId='gol_type', P='{%d,%d,%d,%d}' % (cellCount, generation_count, output_cycle, include_start))
-
-renderedGraphType = type.render(graphType=graphType)
-renderedGraphInstance = instance.render(graphInstance=graphInstance, data=data)
-
-with open(outputFile, 'w') as f:
+with open(definitions.outputFile, 'w') as f:
     f.write(
-        type.fullRender(appname=appname, graphType=renderedGraphType, graphInstance=renderedGraphInstance)
+        type.fullRender(appname=definitions.appname, graphType=renderedGraphType, graphInstance=renderedGraphInstance)
     )

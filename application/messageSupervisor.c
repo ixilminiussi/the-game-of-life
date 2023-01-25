@@ -2,8 +2,9 @@
 //@@//
 uint8_t alive;
 uint32_t generation;
-uint16_t x;
-uint16_t y;
+uint32_t x;
+uint32_t y;
+uint32_t speed;
 uint8_t ping;
 //@@//
 
