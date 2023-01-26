@@ -1,15 +1,15 @@
 from operator import methodcaller
 import numpy as np
 from PIL import Image
-from colour import Color
 import uuid
-import sys, argparse
-import errno
-import os
-
+import sys, argparse, errno, os
+import matplotlib.cm as cm
+    
 outputFull = False
 outputVideo = False
 outputGeneration = False
+
+cmap = cm.get_cmap('viridis')
 
 # read user arguments 
 
@@ -20,7 +20,7 @@ parser.add_argument('-v', '--video', nargs=1, metavar='', help='(filename) Outpu
 parser.add_argument('-f', '--full', nargs=1, metavar='', help='(dir) Output dir name for a full image render of all generations.', required=False, default=['frames'])
 parser.add_argument('-g', '--generation', nargs=1, metavar='', help='(number) Specific generation to be rendered as .png.', required=False)
 parser.add_argument('-s', '--speed', nargs=1, metavar='', help='(number) Framerate of generated video.', required=False, default=[10])
-parser.add_argument('-r', '--render', nargs=1, metavar='', help='(string) Render type: binary | performance.', required=False, default=['binary'])
+parser.add_argument('-r', '--render', nargs=1, metavar='', help='(string) Render type: [binary|performance].', required=False, default=['binary'])
 
 for arg in sys.argv:
     if (arg in ['-v', '--video']):
@@ -64,6 +64,9 @@ Y = max(data, key=lambda x: x[1])[1] +1
 
 range = max([max(i, key=lambda x: x[4])[4] - min(i, key=lambda x: x[4])[4] for i in G.values()])
 
+def map_float_to_rgb(x):
+    return list(cmap(x)[:3])
+
 def generate_grid(generation):
     grid = np.zeros((Y, X, 3))
 
@@ -73,12 +76,12 @@ def generate_grid(generation):
     
     match args.render[0]:
         case 'performance':
+            grid = np.zeros((Y, X, 3))
             for e in data:
-                grid = np.zeros((Y, X))
-                grid[e[1]][e[0]] = (e[4] - minimum)/range
+                grid[e[1]][e[0]] = map_float_to_rgb((e[4] - minimum) / range)
         case _:
+            grid = np.zeros((Y, X))
             for e in data:
-                grid = np.zeros((Y, X))
                 grid[e[1]][e[0]] = e[3]
     
     return (grid*255).astype('uint8')
@@ -108,5 +111,6 @@ if (outputVideo):
         os.system('rmdir {0}'.format(output))
 
 if (outputGeneration):
-    imageObject = Image.fromarray(generate_grid(int(args.generation[0])))
+    grid = generate_grid(int(args.generation[0]))
+    imageObject = Image.fromarray(grid)
     imageObject.save('{0}.png'.format(args.generation[0]))

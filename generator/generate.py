@@ -1,22 +1,29 @@
-import type
-import instance
-import definitions
-import sys
-import os
+import type, instance, definitions
+import sys, argparse, os, errno
 import numpy as np
-from jinja2 import Template
-from operator import methodcaller
 
-if len(sys.argv) < 5:
-    raise AttributeError(
-        'empty|gliders|coords size_x size_y generation_count output_output_cycle 0|1(include first gen)')
+# read user arguments 
 
-size_x = int(sys.argv[2])
-size_y = int(sys.argv[3])
-generation_count = int(sys.argv[4])
-output_cycle = int(sys.argv[5])
-include_start = 0
-if (len(sys.argv) > 6): include_start = int(sys.argv[6])
+parser = argparse.ArgumentParser(add_help=True, description='This script generates a proper XML to run The Game of Life on POETS.')
+
+parser.add_argument('-o', '--output', nargs=1, metavar='', help='(filename) Output file name for the generated XML.', required=False, default=['gol.xml'])
+parser.add_argument('-x', '--xstate', nargs=1, metavar='', help='(string|filename) Starting state preset: [gliders|empty] | Starting file state', required=False, default=['gliders'])
+parser.add_argument('-s', '--size', nargs=2, metavar='', help='(int) Size of the grid: X, Y', required=True)
+parser.add_argument('-g', '--generation', nargs=1, metavar='', help='(int) Number of total generations', required=False, default=[100])
+parser.add_argument('-c', '--cycle', nargs=1, metavar='', help='(int) Iteration cycles to be sent to the supervisor', required=False, default=[1])
+parser.add_argument('-i', '--include', nargs=1, metavar='', help='(int) set to 1 to send the first iteration to the supervisor', required=False, default=[0])
+
+args = parser.parse_args()
+
+if args.xstate[0] not in ['gliders', 'empty'] and not os.path.isfile(args.xstate[0]):
+    raise FileNotFoundError(
+    errno.ENOENT, os.strerror(errno.ENOENT), args.xstate[0])
+
+size_x = int(args.size[0])
+size_y = int(args.size[1])
+generation_count = int(args.generation[0])
+output_cycle = int(args.cycle[0])
+include_start = int(args.include[0])
 
 glider = np.array([[0,0,0,0,0],
 [0,0,1,0,0],
@@ -40,7 +47,7 @@ def create_binary_graph(filename, grid_size_x, grid_size_y):
 
     return grid
 
-match sys.argv[1]:
+match args.xstate[0]:
     case 'empty':
         data = np.zeros((size_x, size_y))
     case 'gliders':
@@ -48,10 +55,7 @@ match sys.argv[1]:
         Y = int((size_y - (size_y % 5)) / 5)
         data = np.tile(glider, (X, Y))
     case _:
-        if not os.path.isfile(sys.argv[1]):
-            raise FileNotFoundError('Starting state file not present in the specified location')
-        else:
-            data = create_binary_graph(sys.argv[1], size_x, size_y)
+        data = create_binary_graph(args.xstate[0], size_x, size_y)
 
 cellCount = len(data) * len(data[0])
 
