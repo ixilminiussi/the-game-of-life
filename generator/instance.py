@@ -5,7 +5,6 @@ def graphToXML(data):
     X = len(data[0])
 
     deviceInstances = '<DevI id="%d" type="pinger" P="" />\n' % (X*Y+1)
-    #deviceInstances = ''
     edgeInstances = ''
 
     def right(id):
@@ -44,24 +43,24 @@ def graphToXML(data):
 
     for y in range(Y):
         for x in range(X):
-            deviceInstances += '<DevI id="%d" type="cell" P="{%d,%d,%d}" />' % (
+            deviceInstances += '<DevI id="%d" type="cell" P="{%d,%d,%d}" />\n' % (
                 id, int(data[y][x]), x, y)
 
-            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />' % (
+            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />\n' % (
                 id, top_left(id))
-            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />' % (
+            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />\n' % (
                 id, top(id))
-            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />' % (
+            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />\n' % (
                 id, top_right(id))
-            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />' % (
+            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />\n' % (
                 id, right(id))
-            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />' % (
+            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />\n' % (
                 id, bottom_right(id))
-            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />' % (
+            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />\n' % (
                 id, bottom(id))
-            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />' % (
+            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />\n' % (
                 id, bottom_left(id))
-            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />' % (
+            edgeInstances += '<EdgeI path="%d:receiver-%d:sender" />\n' % (
                 id, left(id))
 
             id += 1

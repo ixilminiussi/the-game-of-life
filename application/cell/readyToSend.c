@@ -7,17 +7,17 @@ void main()
     //@@//
     if (DEVICESTATE(begin))
     {
-        RTS(neighbourSend);
+        RTS(sender);
         return 0;
     }
     if (DEVICESTATE(buffer))
     {
-        RTS(aggregatorSend);
+        RTSSUP();
         return 0;
     }
     if (DEVICESTATE(generation) < GRAPHPROPERTIES(end) && (DEVICESTATE(neighbourUpdates[DEVICESTATE(generation) % 2]) >= 8))
     {
-        RTS(neighbourSend);
+        RTS(sender);
     }
     //@@//
 }

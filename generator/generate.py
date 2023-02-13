@@ -1,29 +1,33 @@
-import type, instance, definitions
-import sys, argparse, os, errno
+import instance
+import argparse, os, errno
 import numpy as np
+import xml.etree.ElementTree as ET
+from jinja2 import Template
 
 # read user arguments 
 
-parser = argparse.ArgumentParser(add_help=True, description='This script generates a proper XML to run The Game of Life on POETS.')
+parser = argparse.ArgumentParser(add_help=True, description='This script generates a proper XML to run The Game of Life on POETS.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('-o', '--output', nargs=1, metavar='', help='(filename) Output file name for the generated XML.', required=False, default=['gol.xml'])
-parser.add_argument('-x', '--xstate', nargs=1, metavar='', help='(string|filename) Starting state preset: [gliders|empty] | Starting file state', required=False, default=['gliders'])
-parser.add_argument('-s', '--size', nargs=2, metavar='', help='(int) Size of the grid: X, Y', required=True)
-parser.add_argument('-g', '--generation', nargs=1, metavar='', help='(int) Number of total generations', required=False, default=[100])
-parser.add_argument('-c', '--cycle', nargs=1, metavar='', help='(int) Iteration cycles to be sent to the supervisor', required=False, default=[1])
-parser.add_argument('-i', '--include', nargs=1, metavar='', help='(int) set to 1 to send the first iteration to the supervisor', required=False, default=[0])
+parser.add_argument('-a', '--application', metavar='', help='(filename) graphtype being used', required=False, default='../application.xml')
+parser.add_argument('-o', '--output', metavar='', help='(filename) output file name for the generated XML', required=False, default='gol.xml')
+parser.add_argument('-x', '--xstate', metavar='', help='(string|filename) starting state preset: [gliders|empty] | Starting file state', required=False, default='gliders')
+parser.add_argument('-s', '--size', nargs=2, metavar='', help='(int) size of the grid: X, Y', required=True)
+parser.add_argument('-g', '--generation', metavar='', help='(int) number of total generations', required=False, default=100)
+parser.add_argument('-c', '--cycle', metavar='', help='(int) cycles of iterations to be sent to the supervisor', required=False, default=1)
+parser.add_argument('-i', '--include', help='send the first iteration to the supervisor', required=False, action='store_true')
 
 args = parser.parse_args()
 
-if args.xstate[0] not in ['gliders', 'empty'] and not os.path.isfile(args.xstate[0]):
+if args.xstate not in ['gliders', 'empty'] and not os.path.isfile(args.xstate):
     raise FileNotFoundError(
-    errno.ENOENT, os.strerror(errno.ENOENT), args.xstate[0])
+    errno.ENOENT, os.strerror(errno.ENOENT), args.xstate)
 
 size_x = int(args.size[0])
 size_y = int(args.size[1])
-generation_count = int(args.generation[0])
-output_cycle = int(args.cycle[0])
-include_start = int(args.include[0])
+generation_count = int(args.generation)
+output_cycle = int(args.cycle)
+include_start = int(args.include)
+output_file = args.output
 
 glider = np.array([[0,0,0,0,0],
 [0,0,1,0,0],
@@ -31,7 +35,32 @@ glider = np.array([[0,0,0,0,0],
 [0,1,1,1,0],
 [0,0,0,0,0]])
 
-def create_binary_graph(filename, grid_size_x, grid_size_y):
+graphType = ''
+
+with open(args.application, 'r') as file:
+    graphType = file.read()
+
+
+appname = 'gol'
+
+graphTypeId = ET.fromstring(graphType).attrib.get('id')
+
+ET.register_namespace('', 'https://poets-project.org/schemas/virtual-graph-schema-v4')
+
+def graphInstance(P):
+    param = ','.join(str(p) for p in P)
+    return instance.GraphInstance(id='gol_instance', graphTypeId=graphTypeId, P='{%s}' % param)
+
+def fullRender(appname, graphType, graphInstance):
+    template = Template('''<?xml version="1.0" encoding="UTF-8"?>
+<Graphs xmlns="https://poets-project.org/schemas/virtual-graph-schema-v4" appname="{{ appname }}">
+    {{ graphType }}
+    {{ graphInstance }}
+</Graphs>
+    ''')
+    return template.render(appname=appname, graphType=graphType, graphInstance=graphInstance)
+
+def createBinaryGraph(filename, grid_size_x, grid_size_y):
     coords = []
     # Read the coordinates from the file
     with open(filename, 'r') as file:
@@ -39,15 +68,15 @@ def create_binary_graph(filename, grid_size_x, grid_size_y):
             coords.append(line.strip().split(','))
 
     # Create an empty grid with the specified size
-    grid = [[0 for x in range(grid_size_y)] for y in range(grid_size_x)]
+    grid = [[0 for x in range(grid_size_x)] for y in range(grid_size_y)]
 
     # Set the coordinates to 1
     for coord in coords:
-        grid[int(coord[0])][int(coord[1])] = 1
+        grid[int(coord[1])][int(coord[0])] = 1
 
     return grid
 
-match args.xstate[0]:
+match args.xstate:
     case 'empty':
         data = np.zeros((size_x, size_y))
     case 'gliders':
@@ -55,14 +84,11 @@ match args.xstate[0]:
         Y = int((size_y - (size_y % 5)) / 5)
         data = np.tile(glider, (X, Y))
     case _:
-        data = create_binary_graph(args.xstate[0], size_x, size_y)
+        data = createBinaryGraph(args.xstate, size_x, size_y)
 
 cellCount = len(data) * len(data[0])
 
-renderedGraphType = type.render(graphType=definitions.graphType)
-renderedGraphInstance = instance.render(graphInstance=definitions.graphInstance([cellCount, generation_count, output_cycle, include_start]), data=data)
+renderedGraphInstance = instance.render(graphInstance=graphInstance([cellCount, generation_count, output_cycle, include_start]), data=data)
 
-with open(definitions.outputFile, 'w') as f:
-    f.write(
-        type.fullRender(appname=definitions.appname, graphType=renderedGraphType, graphInstance=renderedGraphInstance)
-    )
+with open(output_file, 'w') as f:
+    f.write(fullRender(appname=appname, graphType=graphType, graphInstance=renderedGraphInstance))

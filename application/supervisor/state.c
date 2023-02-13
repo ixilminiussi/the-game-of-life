@@ -8,11 +8,3 @@ std::chrono::steady_clock::time_point startTime;
 
 FILE *resultFile;
 //@@//
-
-inline uint8_t SUPSTATE(val) {
-    return val;
-}
-
-inline uint32_t SUPSTATE(val) {
-    return val;
-}

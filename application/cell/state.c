@@ -17,11 +17,3 @@ uint8_t buffer = 0;
 uint8_t balive;
 uint8_t bgeneration;
 //@@//
-
-inline uint8_t DEVICESTATE(val) {
-    return val;
-}
-
-inline uint32_t DEVICESTATE(val) {
-    return val;
-}

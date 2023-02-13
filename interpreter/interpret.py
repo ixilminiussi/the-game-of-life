@@ -13,14 +13,14 @@ cmap = cm.get_cmap('viridis')
 
 # read user arguments 
 
-parser = argparse.ArgumentParser(add_help=True, description='This script interprets output files from the POETS implementation of The Game of Life.')
+parser = argparse.ArgumentParser(add_help=True, description='This script interprets output files from the POETS implementation of The Game of Life.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('-i', '--input', nargs=1, metavar='', help='(filename) Input file used to make generations.', required=False, default=['gol_output'])
-parser.add_argument('-v', '--video', nargs=1, metavar='', help='(filename) Output file name for a video render of all generations.', required=False, default=['video.mp4'])
-parser.add_argument('-f', '--full', nargs=1, metavar='', help='(dir) Output dir name for a full image render of all generations.', required=False, default=['frames'])
-parser.add_argument('-g', '--generation', nargs=1, metavar='', help='(number) Specific generation to be rendered as .png.', required=False)
-parser.add_argument('-s', '--speed', nargs=1, metavar='', help='(number) Framerate of generated video.', required=False, default=[10])
-parser.add_argument('-r', '--render', nargs=1, metavar='', help='(string) Render type: [binary|performance].', required=False, default=['binary'])
+parser.add_argument('-i', '--input', metavar='', help='(filename) input file used to make generations', required=False, default='gol_output')
+parser.add_argument('-v', '--video', metavar='', help='(filename) output file name for a video render of all generations', required=False)
+parser.add_argument('-f', '--full', metavar='', help='(dir) output dir name for a full image render of all generations', required=False, default='frames')
+parser.add_argument('-g', '--generation', metavar='', help='(number) specific generation to be rendered as .png', required=False)
+parser.add_argument('-s', '--speed', metavar='', help='(number) framerate of generated video', required=False, default=10)
+parser.add_argument('-r', '--render', metavar='', help='(string) render type: [binary|performance]', required=False, default='binary')
 
 for arg in sys.argv:
     if (arg in ['-v', '--video']):
@@ -35,16 +35,16 @@ if (not outputFull and not outputGeneration and not outputVideo):
 
 args = parser.parse_args()
 
-if not os.path.isfile(args.input[0]):
+if not os.path.isfile(args.input):
     raise FileNotFoundError(
-    errno.ENOENT, os.strerror(errno.ENOENT), args.input[0])
+    errno.ENOENT, os.strerror(errno.ENOENT), args.input)
 
 # code
 
 g = []
 G = {}
 
-with open(args.input[0],'r') as f:
+with open(args.input,'r') as f:
     lines = map(methodcaller('strip', '\n'), f.readlines())
     data = list(map(methodcaller('split', ','), lines))
     
@@ -74,7 +74,7 @@ def generate_grid(generation):
     
     data = G[generation]
     
-    match args.render[0]:
+    match args.render:
         case 'performance':
             grid = np.zeros((Y, X, 3))
             for e in data:
@@ -97,20 +97,20 @@ def generate_all(output):
     return locations
 
 if (outputFull):
-    generate_all(args.full[0])
+    generate_all(args.full)
 
 if (outputVideo):
     if (outputFull):
-        os.system("ffmpeg  -hide_banner -loglevel error -framerate {0} -i '{1}/%00d.png' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p {2}".format(args.speed[0], args.full[0], args.video[0]))
+        os.system("ffmpeg  -hide_banner -loglevel error -framerate {0} -i '{1}/%00d.png' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p {2}".format(args.speed, args.full, args.video))
     else:
         output = uuid.uuid1()
         locations = generate_all(output)
-        os.system("ffmpeg  -hide_banner -loglevel error -framerate {0} -i '{1}/%00d.png' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p {2}".format(args.speed[0], output, args.video[0]))
+        os.system("ffmpeg  -hide_banner -loglevel error -framerate {0} -i '{1}/%00d.png' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p {2}".format(args.speed, output, args.video))
         for image in locations:
             os.system("rm {0}".format(image))
         os.system('rmdir {0}'.format(output))
 
 if (outputGeneration):
-    grid = generate_grid(int(args.generation[0]))
+    grid = generate_grid(int(args.generation))
     imageObject = Image.fromarray(grid)
-    imageObject.save('{0}.png'.format(args.generation[0]))
+    imageObject.save('{0}.png'.format(args.generation))
