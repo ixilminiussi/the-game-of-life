@@ -1,3 +1,0 @@
-//@@//
-#include <tinsel.h>
-//@@//

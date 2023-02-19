@@ -4,7 +4,7 @@ def graphToXML(data):
     Y = len(data)
     X = len(data[0])
 
-    deviceInstances = '<DevI id="%d" type="pinger" P="" />\n' % (X*Y+1)
+    deviceInstances = ''
     edgeInstances = ''
 
     def right(id):
