@@ -1,3 +1,8 @@
+# POETS
+This implementation is meant to run on POETS (Partially Order Event Triggered Systems), and event-based massively parallel computing computing technique.
+As such, the C implementation is stripped down and doesn't implement all C functions and capabilities. It also must be generated into an massive XML format describing every node state and functions.
+This was done in the context of a thesis (cut short) about graph placement algorithms/strategies for POETS.
+
 ## generating code
 To generate the appropriate XML for your code and specific starting state, run `./generator/generate.py`:
 ```
