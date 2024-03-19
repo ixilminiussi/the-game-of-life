@@ -8,7 +8,7 @@ from operator import methodcaller
 
 if len(sys.argv) < 5:
     raise AttributeError(
-        'empty|gliders|coords size_x size_y generation_count output_output_cycle 0|1(include first gen)')
+        'empty|gliders|coords size_x size_y generation_count output_cycle 0|1(include first gen)')
 
 size_x = int(sys.argv[2])
 size_y = int(sys.argv[3])
